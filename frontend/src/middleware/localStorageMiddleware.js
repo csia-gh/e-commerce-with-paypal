@@ -1,19 +1,37 @@
 const localStorageMiddleware = (store) => (next) => (action) => {
-  console.log('Middleware triggered:', action.type);
+  // console.log('Middleware triggered:', action.type)
 
-  const result = next(action); // Pass action to the next middleware or reducer
-  const state = store.getState(); // Get the updated state after the action
+  const result = next(action) // Pass action to the next middleware or reducer
+  const state = store.getState() // Get the updated state after the action
 
   // Save cart state to localStorage if the action affects the cart
   if (action.type.startsWith('cart/')) {
     try {
-      localStorage.setItem('cart', JSON.stringify(state.cart));
+      localStorage.setItem('cart', JSON.stringify(state.cart))
     } catch (error) {
-      console.error('Failed to save cart to localStorage:', error);
+      console.error('Failed to save cart to localStorage:', error)
     }
   }
 
-  return result; // Return the result of `next(action)`
-};
+  // Save auth state to localStorage if the action affects auth
+  if (action.type.startsWith('auth/')) {
+    try {
+      if (state.auth.userInfo) {
+        // Save user info to localStorage
+        localStorage.setItem(
+          'userInfo',
+          JSON.stringify(state.auth.userInfo)
+        )
+      } else {
+        // Remove user info from localStorage (logout case)
+        localStorage.removeItem('userInfo')
+      }
+    } catch (error) {
+      console.error('Failed to save user info to localStorage:', error)
+    }
+  }
 
-export default localStorageMiddleware;
+  return result // Return the result of `next(action)`
+}
+
+export default localStorageMiddleware
